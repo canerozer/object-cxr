@@ -324,3 +324,12 @@ def init_distributed_mode(args):
                                          world_size=args.world_size, rank=args.rank)
     torch.distributed.barrier()
     setup_for_distributed(args.rank == 0)
+
+
+class DictAsMember(dict):
+    def __getattr__(self, name):
+        value = self[name]
+        if isinstance(value, dict):
+            value = DictAsMember(value)
+        return value
+

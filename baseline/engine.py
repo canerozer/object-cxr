@@ -8,7 +8,8 @@ import torchvision.models.detection.mask_rcnn
 import utils
 
 
-def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
+def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq,
+                    my_logger=None, name=None):
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -39,6 +40,10 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
             print("Loss is {}, stopping training".format(loss_value))
             print(loss_dict_reduced)
             sys.exit(1)
+
+        if my_logger:
+            my_logger.scalar(loss_value, win="Loss", trace=name,
+                             xlabel="Iteration")
 
         optimizer.zero_grad()
         losses.backward()
