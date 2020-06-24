@@ -160,7 +160,8 @@ if __name__ == "__main__":
     dataset_train = ForeignObjectDataset(datafolder=data_dir+'train/',
                                          datatype='train',
                                          transform=data_transforms,
-                                         labels_dict=img_class_dict_tr)
+                                         labels_dict=img_class_dict_tr,
+                                         augment=exp_args.AUGMENT)
     dataset_dev = ForeignObjectDataset(datafolder=data_dir+'dev/',
                                        datatype='dev',
                                        transform=data_transforms,

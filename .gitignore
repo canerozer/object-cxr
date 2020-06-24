@@ -2,3 +2,4 @@
 baseline/.ipynb_checkpoints/
 baseline/__pycache__/
 baseline/models/
+baseline/data/*
