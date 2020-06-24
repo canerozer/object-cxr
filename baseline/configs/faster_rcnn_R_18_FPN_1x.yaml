@@ -16,3 +16,7 @@ RECORD:
     LOSS: True
     AUC: True
     FROC: True
+AUGMENT:
+    HORIZONTAL_FLIP: True
+    VERTICAL_FLIP: True
+    JITTER: True
