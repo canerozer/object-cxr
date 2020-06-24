@@ -15,8 +15,8 @@ def fasterrcnn_resnet_fpn(pretrained=False, progress=True, resnet='resnet50',
         model.load_state_dict(state_dict)
     return model
 
-def _get_detection_model(num_classes, resnet):
-    model = fasterrcnn_resnet_fpn(pretrained=False, resnet=resnet)
+def _get_detection_model(num_classes, resnet, **kwargs):
+    model = fasterrcnn_resnet_fpn(pretrained=False, resnet=resnet, **kwargs)
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model

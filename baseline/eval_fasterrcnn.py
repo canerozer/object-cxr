@@ -12,8 +12,6 @@ import argparse
 import yaml
 from sklearn.metrics import roc_auc_score, roc_curve, auc
 from tqdm import tqdm
-import lamp
-import logging
 
 from dataset import ForeignObjectDataset
 from engine import train_one_epoch
@@ -26,6 +24,12 @@ if __name__ == "__main__":
     parser.add_argument('--yaml', type=str, metavar='YAML',
                         default="configs/faster_rcnn",
                         help='Enter the path for the YAML config')
+    parser.add_argument('--nms', type=float, metavar='NMS',
+                        default=0.05,
+                        help="Enter the NMS threshold for Faster R-CNN")
+    parser.add_argument('--det', type=float, metavar='DET',
+                        default=0.25,
+                        help="Enter the detection threshold for Faster R-CNN")
     args = parser.parse_args()
 
     yaml_path = args.yaml
@@ -33,7 +37,9 @@ if __name__ == "__main__":
         exp_args = DictAsMember(yaml.safe_load(f))
 
     model = _get_detection_model(exp_args.MODEL.N_CLASS,
-                                 exp_args.MODEL.NAME)
+                                 exp_args.MODEL.NAME,
+                                 box_nms_thresh=args.nms,
+                                 box_score_thresh=args.det)
 
     data_dir = 'data/'
 
@@ -118,7 +124,7 @@ if __name__ == "__main__":
                                 "classification.csv")
     cls_res.to_csv(cls_res_path, columns=['image_name', 'prediction'],
                    sep=',', index=None)
-    print('classification.csv generated.')
+    #print('classification.csv generated.')
 
     loc_res = pd.DataFrame({'image_name': dataset_dev.image_files_list,
                             'prediction': locs})
@@ -127,7 +133,7 @@ if __name__ == "__main__":
                                 "localization.csv")
     loc_res.to_csv(loc_res_path, columns=['image_name', 'prediction'],
                    sep=',', index=None)
-    print('localization.csv generated.')
+    #print('localization.csv generated.')
 
     pred = cls_res.prediction.values
     gt = labels_dev.annotation.astype(bool).astype(float).values
@@ -146,4 +152,5 @@ if __name__ == "__main__":
     roc_curve = os.path.join(exp_args.MODEL.SAVE_TO,
                              exp_args.MODEL.NAME,
                              "roc_curve.eps")
-    plt.savefig(roc_curve)
+    #plt.savefig(roc_curve)
+    print("ACC: {} AUC: {}".format(acc, roc_auc))
