@@ -19,7 +19,17 @@ from PIL import Image
 IMG_SIZE = 600
 IMG_HALF = IMG_SIZE / 2
 
-def jitter(x, targets):
+def jitter(x, targets, ratio=0.1):
+    """
+    brightness_factor: if 1 no operation between 0, 2
+    contrast_factor: if 1 no operation between 0, 2
+    saturation_factor: f 1 no operation between 0, 2
+    hue_factor: if 0 no operation between -0.5, 0.5
+    """
+    x = transforms.functional.adjust_brightness(x, brightness_factor= 1+random.uniform(-ratio, ratio))
+    x = transforms.functional.adjust_contrast(x, contrast_factor= 1+random.uniform(-ratio, ratio))
+    x = transforms.functional.adjust_saturation(x, saturation_factor= 1+random.uniform(-ratio, ratio))
+    x = transforms.functional.adjust_hue(x, hue_factor=random.uniform(-ratio, ratio))
     return x, targets
 
 def vflip(x, targets):
