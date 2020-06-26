@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     state_dict = os.path.join(exp_args.MODEL.SAVE_TO,
                               exp_args.MODEL.NAME,
-                              "model.pt")
+                              exp_args.NAME + ".pt")
     model.load_state_dict(torch.load(state_dict))
     model.to(device)
 

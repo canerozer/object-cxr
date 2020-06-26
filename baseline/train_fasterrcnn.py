@@ -32,7 +32,8 @@ def train():
     for epoch in range(exp_args.SOLVER.EPOCH):
         train_one_epoch(model_ft, optimizer, data_loader, device, epoch,
                         print_freq=20, my_logger=my_logger,
-                        name=exp_args.MODEL.NAME)
+                        name=exp_args.MODEL.NAME,
+                        env_name=exp_args.NAME)
         lr_scheduler.step()
 
         auc_max = eval(epoch, auc_max)
@@ -69,12 +70,12 @@ def eval(epoch, auc_max):
     acc = number / len(val_pred_label)    
     auc_init = roc_auc_score(val_label,val_pred)
 
-    my_logger.scatter(auc_init, index=epoch, 
+    my_logger.scatter(auc_init, env=exp_args.NAME, index=epoch, 
                       win="AUC", trace=exp_args.MODEL.NAME,
-                      xlabel="Epoch")
-    my_logger.scatter(acc, index=epoch,
+                      xlabel="Epoch", ylabel=None)
+    my_logger.scatter(acc, env=exp_args.NAME, index=epoch,
                       win="ACC", trace=exp_args.MODEL.NAME,
-                      xlabel="Epoch")
+                      xlabel="Epoch", ylabel=None)
 
     print('Epoch: ', epoch, '| val acc: %.4f' % acc, '| val auc: %.4f' % auc_init)
 
@@ -84,7 +85,7 @@ def eval(epoch, auc_max):
         os.makedirs(exp_args.MODEL.SAVE_TO + "/" + exp_args.MODEL.NAME,
                     exist_ok=True)
         torch.save(model_ft.state_dict(), 
-                   exp_args.MODEL.SAVE_TO + "/" + exp_args.MODEL.NAME + "/model.pt")
+                   exp_args.MODEL.SAVE_TO + "/" + exp_args.MODEL.NAME + "/" + exp_args.NAME + ".pt")
     return auc_max
 
 if __name__ == "__main__":

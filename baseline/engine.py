@@ -9,7 +9,7 @@ import utils
 
 
 def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq,
-                    my_logger=None, name=None):
+                    my_logger=None, name=None, env_name=None):
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -42,8 +42,8 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq,
             sys.exit(1)
 
         if my_logger:
-            my_logger.scalar(loss_value, win="Loss", trace=name,
-                             xlabel="Iteration")
+            my_logger.scalar(loss_value, env=env_name, win="Loss",
+                             trace=name, xlabel="Iteration")
 
         optimizer.zero_grad()
         losses.backward()
