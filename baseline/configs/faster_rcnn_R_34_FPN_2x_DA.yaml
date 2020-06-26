@@ -1,0 +1,42 @@
+NAME: FRCNN_R34_FPN_2x_DA
+MODEL:
+    NAME: "resnet34"        # Change
+    PRETRAINED: True        # Change
+    BATCH_SIZE: 8
+    N_CLASS: 2
+    SAVE_TO: models
+SOLVER:
+    EPOCH: 20                # Change
+    INIT_LR: 0.005
+    MOMENTUM: 0.9
+    WEIGHT_DECAY: 0.0005
+SCHEDULER:
+    IN_EVERY: [5]             # Change
+    GAMMA: 0.1
+RECORD:
+    LOSS: True
+    AUC: True
+    FROC: True
+AUGMENT:
+    STATE: True
+    HORIZONTAL_FLIP:
+        STATE: True
+        P: 0.5
+    VERTICAL_FLIP:
+        STATE: False
+        P: 0.5
+    JITTER:
+        STATE: True
+        P: 0.5
+        BR: 0.4
+        CON: 0.4
+        SAT: 0.4
+        HUE: 0.1        
+    RANDOM_AFFINE:
+        STATE: True
+        P: 0.5
+        DEG: 30
+        TR: 0.1
+        SC_MIN: 0.95
+        SC_MAX: 1.05
+        SH: 0.1

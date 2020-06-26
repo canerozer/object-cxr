@@ -17,36 +17,44 @@ from PIL import Image
     'iscrowd': tensor([0, 0, 0, 0])}
 """
 IMG_SIZE = 600
-IMG_HALF = IMG_SIZE / 2
+# IMG_HALF = IMG_SIZE / 2
 
-def jitter(x, targets, ratio=0.1):
+def jitter(x, targets, conf={}):
     """
     brightness_factor: if 1 no operation between 0, 2
     contrast_factor: if 1 no operation between 0, 2
     saturation_factor: f 1 no operation between 0, 2
     hue_factor: if 0 no operation between -0.5, 0.5
     """
-    x = transforms.functional.adjust_brightness(x, brightness_factor= 1+random.uniform(-ratio, ratio))
-    x = transforms.functional.adjust_contrast(x, contrast_factor= 1+random.uniform(-ratio, ratio))
-    x = transforms.functional.adjust_saturation(x, saturation_factor= 1+random.uniform(-ratio, ratio))
-    x = transforms.functional.adjust_hue(x, hue_factor=random.uniform(-ratio, ratio))
+    br = conf.BR
+    con = conf.CON
+    sat = conf.SAT
+    hue = conf.HUE
+    x = transforms.functional.adjust_brightness(x, brightness_factor= 1+random.uniform(-br, br))
+    x = transforms.functional.adjust_contrast(x, contrast_factor= 1+random.uniform(-con, con))
+    x = transforms.functional.adjust_saturation(x, saturation_factor= 1+random.uniform(-sat, sat))
+    x = transforms.functional.adjust_hue(x, hue_factor=random.uniform(-hue, hue))
     return x, targets
 
 def vflip(x, targets):
     x = transforms.functional.vflip(x)
-    targets['boxes'][:,1] = IMG_HALF - (targets['boxes'][:,1] - IMG_HALF)
-    targets['boxes'][:,3] = IMG_HALF - (targets['boxes'][:,3] - IMG_HALF)
+    temp_ymin = IMG_SIZE - targets['boxes'][:,1]
+    temp_ymax = IMG_SIZE - targets['boxes'][:,3]
+    targets['boxes'][:,1] = temp_ymax
+    targets['boxes'][:,3] = temp_ymin
     return x, targets
 
 def hflip(x, targets):
     x = transforms.functional.hflip(x)
-    targets['boxes'][:,0] = IMG_HALF - (targets['boxes'][:,0] - IMG_HALF)
-    targets['boxes'][:,2] = IMG_HALF - (targets['boxes'][:,2] - IMG_HALF)
+    temp_xmin = IMG_SIZE - targets['boxes'][:,0]
+    temp_xmax = IMG_SIZE - targets['boxes'][:,2]
+    targets['boxes'][:,0] = temp_xmax
+    targets['boxes'][:,2] = temp_xmin
     return x, targets
 
-def apply(func, x, targets, prob=0.5):
+def apply(func, x, targets, prob=0.5, **kwargs):
     if random.random() < prob:
-        x, targets = func(x, targets)
+        x, targets = func(x, targets, **kwargs)
     return x, targets
 
 
@@ -111,18 +119,22 @@ class ForeignObjectDataset(object):
             target["iscrowd"] = iscrowd
 
             # color based
-            if self.augment.HORIZONTAL_FLIP:
-                img, target = apply(hflip, img, target, prob=0.5)
+            if self.augment.STATE:
+                if self.augment.HORIZONTAL_FLIP.STATE:
+                    img, target = apply(hflip, img, target,
+                                        prob=self.augment.HORIZONTAL_FLIP.P)
 
-            if self.augment.VERTICAL_FLIP:
-                img, target = apply(vflip, img, target, prob=0.5)
+                if self.augment.VERTICAL_FLIP.STATE:
+                    img, target = apply(vflip, img, target,
+                                        prob=self.augment.VERTICAL_FLIP.P)
 
-            if self.augment.JITTER:
-                img, target = apply(jitter, img, target, prob=0.5)
+                if self.augment.JITTER.STATE:
+                    img, target = apply(jitter, img, target,
+                                        prob=self.augment.JITTER.P,
+                                        conf=self.augment.JITTER)
             
             if self.transform is not None:
                 img = self.transform(img)
-            
 
             return img, target
         

@@ -17,6 +17,4 @@ RECORD:
     AUC: True
     FROC: True
 AUGMENT:
-    HORIZONTAL_FLIP: False
-    VERTICAL_FLIP: False
-    JITTER: True
+    STATE: False

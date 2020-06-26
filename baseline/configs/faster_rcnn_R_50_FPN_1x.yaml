@@ -16,3 +16,5 @@ RECORD:
     LOSS: True
     AUC: True
     FROC: True
+AUGMENT:
+    STATE: False
