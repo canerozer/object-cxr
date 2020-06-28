@@ -29,12 +29,16 @@ CONF_WEIGHT = 'params.pt'
 #               predictions_classification.csv
 #               predictions_localization.csv
 
+# python submit.py image_path.csv predictions_classification.csv predictions_localization.csv
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='CXR Object Localization')
-    parser.add_argument('image_path', type=str, metavar='YAML',
-                        default="configs/faster_rcnn",
-                        help='Enter the path for the YAML config')
+    parser.add_argument('image_path', type=str, metavar='IMAGE_PATH',
+                        help='')
+    parser.add_argument('predictions_classification', type=str, metavar='PREDICTIONS_CLASSIFICATION',
+                        help='')
+    parser.add_argument('predictions_localization', type=str, metavar='PREDICTIONS_LOCALIZATION',
+                        help='')
     args = parser.parse_args()
     yaml_path = CONF_YAML
     with open(yaml_path, 'r') as f:
@@ -45,14 +49,6 @@ if __name__ == "__main__":
                                  box_nms_thresh=CONF_NMS,
                                  box_score_thresh=CONF_DET)
 
-    data_dir = 'data/'
-
-    meta_dev = data_dir + 'dev.csv'
-    labels_dev = pd.read_csv(meta_dev, na_filter=False)
-
-    img_class_dict_dev = dict(zip(labels_dev.image_name,
-                                  labels_dev.annotation))
-
     img_mean = [0.485, 0.456, 0.406]
     img_std = [0.229, 0.224, 0.225]
     data_transforms = transforms.Compose([transforms.Resize((600, 600)),
@@ -61,13 +57,14 @@ if __name__ == "__main__":
                                                                std=img_std)]
                                          )
 
-    dataset_dev = SubmitDataset(datafolder=data_dir+'dev/',
+    image_files_list = [line for line in open(args.image_path, 'r').read().splitlines(keepends=False)]
+    dataset = SubmitDataset(image_files_list=image_files_list,
                                 transform=data_transforms)
 
-    data_loader_val = DataLoader(dataset_dev,
+    data_loader_val = DataLoader(dataset,
                                  batch_size=1,
-                                 shuffle=False, num_workers=4,
-                                 collate_fn=utils.collate_fn)
+                                 shuffle=False, num_workers=4)
+                                 #collate_fn=utils.collate_fn)
 
     device = torch.device('cuda:0')
 
@@ -79,10 +76,9 @@ if __name__ == "__main__":
     preds = []
     locs = []
 
-    for image in tqdm(data_loader_val):
+    for image, width, height in tqdm(data_loader_val):
         
-        image = list(img.to(device) for img in image)
-        
+        image = image.to(device)
         outputs = model(image)
         
         center_points = []
@@ -110,26 +106,20 @@ if __name__ == "__main__":
             line = ''
             for i in range(len(new_boxes)):
                 if i == len(new_boxes)-1:
-                    line += str(center_points_preds[i]) + ' ' + str(center_points[i][0]) + ' ' + str(center_points[i][1])
+                    line += str(center_points_preds[i]) + ' ' + str(center_points[i][0].item()) + ' ' + str(center_points[i][1].item())
                 else:
-                    line += str(center_points_preds[i]) + ' ' + str(center_points[i][0]) + ' ' + str(center_points[i][1]) +';'
+                    line += str(center_points_preds[i]) + ' ' + str(center_points[i][0].item()) + ' ' + str(center_points[i][1].item()) +';'
             locs.append(line)
 
-    cls_res = pd.DataFrame({'image_name': dataset_dev.image_files_list,
+    cls_res = pd.DataFrame({'image_name': dataset.image_files_list,
                             'prediction': preds})
-    cls_res_path = os.path.join(exp_args.MODEL.SAVE_TO,
-                                exp_args.MODEL.NAME,
-                                "classification.csv")
-    cls_res.to_csv(cls_res_path, columns=['image_name', 'prediction'],
+    cls_res.to_csv(args.predictions_classification, columns=['image_name', 'prediction'],
                    sep=',', index=None)
     print('classification.csv generated.')
 
-    loc_res = pd.DataFrame({'image_name': dataset_dev.image_files_list,
+    loc_res = pd.DataFrame({'image_name': dataset.image_files_list,
                             'prediction': locs})
-    loc_res_path = os.path.join(exp_args.MODEL.SAVE_TO,
-                                exp_args.MODEL.NAME,
-                                "localization.csv")
-    loc_res.to_csv(loc_res_path, columns=['image_name', 'prediction'],
+    loc_res.to_csv(args.predictions_localization, columns=['image_name', 'prediction'],
                    sep=',', index=None)
     print('localization.csv generated.')
 

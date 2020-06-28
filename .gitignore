@@ -7,3 +7,5 @@ baseline/data/train/*
 baseline/data/dev.csv
 baseline/data/train.csv
 src/params.pt
+*.pyc
+*.csv
