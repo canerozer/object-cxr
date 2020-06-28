@@ -9,6 +9,7 @@ import os
 import utils
 import argparse
 from tqdm import tqdm
+from PIL import Image
 
 from dataset import SubmitDataset
 from utils import DictAsMember
@@ -70,6 +71,7 @@ if __name__ == "__main__":
     preds = []
     locs = []
 
+    idx = 0
     for image, width, height in tqdm(data_loader_val):
         
         image = image.to(device)
@@ -90,6 +92,12 @@ if __name__ == "__main__":
             new_boxes = outputs[-1]['boxes'][new_output_index]
             new_scores = outputs[-1]['scores'][new_output_index]
             
+            print(new_scores)
+            print(new_boxes)
+            utils.draw_PIL_image(
+                Image.open(dataset.image_files_list[idx]).convert("RGB").resize((600,600)), 
+                new_boxes, None)
+
             for i in range(len(new_boxes)):
                 new_box = new_boxes[i].tolist()
                 center_x = (new_box[0] + new_box[2])/2
@@ -104,6 +112,7 @@ if __name__ == "__main__":
                 else:
                     line += str(center_points_preds[i]) + ' ' + str(center_points[i][0].item()) + ' ' + str(center_points[i][1].item()) +';'
             locs.append(line)
+        idx += 1
 
     cls_res = pd.DataFrame({'image_name': dataset.image_files_list,
                             'prediction': preds})

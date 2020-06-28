@@ -5,8 +5,12 @@ import datetime
 import pickle
 import time
 
+import matplotlib.pyplot as plt
 import torch
+import torchvision.transforms.functional as F
 import torch.distributed as dist
+import PIL
+from PIL import ImageDraw
 
 import errno
 import os
@@ -333,3 +337,27 @@ class DictAsMember(dict):
             value = DictAsMember(value)
         return value
 
+def draw_PIL_image(image, boxes, labels):
+    '''
+        Draw PIL image
+        image: A PIL image
+        labels: A tensor of dimensions (#objects,)
+        boxes: A tensor of dimensions (#objects, 4)
+    '''
+    fig, ax = plt.subplots(1, 1)
+
+    if type(image) != PIL.Image.Image:
+        image = F.to_pil_image(image)
+    new_image = image.copy()
+    #labels = labels.tolist()
+    draw = ImageDraw.Draw(new_image)
+    boxes = boxes.tolist()
+    for i in range(len(boxes)):
+        draw.rectangle(xy=boxes[i], width=5)
+                       #outline=label_color_map[rev_label_map[labels[i]]])
+
+    im = ax.imshow(new_image)
+    plt.show()
+
+
+    
