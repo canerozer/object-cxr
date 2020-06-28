@@ -21,15 +21,16 @@ cl add bundle object-CXR-utlis//image_path.csv .
 3. Run 
 
 ```
-cl run image_path.csv:image_path.csv valid_image:valid_image src:src "python3 src/submit.py image_path.csv predictions_classification.csv predictions_localization.csv" -n run-predictions --request-docker  anibali/pytorch:cuda-9.0 --request-gpus 1
+cl run params.pt:params.pt image_path.csv:image_path.csv valid_image:valid_image src:src "python3 src/submit.py image_path.csv predictions_classification.csv predictions_localization.csv"  
+ -n run-predictions --request-docker  mozanunal/pytorch-gpu-dev:1.5.0-cuda10.2 --request-gpus 1
 
 ```
 
 4. Extract Predictions
 
 ```
-cl make run-predictions/predictions_classification.csv  -n predictions-classification-{MODELNAME}
-cl make run-predictions/predictions_localization.csv -n predictions-localization-{MODELNAME}
+cl make run-predictions/predictions_classification.csv  -n predictions-classification-FRCNN_R50_FPN_2x_DA
+cl make run-predictions/predictions_localization.csv -n predictions-localization-FRCNN_R50_FPN_2x_DA
 ```
 
 5. Validate Predictions
@@ -44,13 +45,14 @@ cl run valid_gt.csv:valid_gt.csv run-predictions:run-predictions program:program
 6. Naming the Submission
 
 ```
+
 ```
 
 7. Adding Submission Mark
 
 ```
-cl edit predictions-classification-{MODELNAME} --tags object-CXR-submit
-cl edit predictions-localization-{MODELNAME} --tags object-CXR-submit
+cl edit predictions-classification-FRCNN_R152_FPN_2x_DA --tags object-CXR-submit
+cl edit predictions-localization-FRCNN_R152_FPN_2x_DA --tags object-CXR-submit
 ```
 
 8. Submission

@@ -4,10 +4,10 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 import numpy as np
+import pandas as pd
 import os
 import utils
 import argparse
-import yaml
 from tqdm import tqdm
 
 from dataset import SubmitDataset
@@ -15,11 +15,13 @@ from utils import DictAsMember
 from fasterrcnn_models import _get_detection_model
 
 
-CONF_YAML = "src/conf.yaml"
+CONF_WEIGHT = 'FRCNN_R50_FPN_2x_DA.pt'
+#CONF_WEIGHT = 'FRCNN_R152_FPN_2x_DA.pt'
 CONF_NMS = 0.05
 CONF_DET = 0.25
-CONF_WEIGHT = 'params.pt'
-
+#CONF_MODEL_NAME = 'resnet152'
+CONF_MODEL_NAME = 'resnet50'
+CONF_MODEL_NCLASS = 2
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='CXR Object Localization')
@@ -30,12 +32,12 @@ if __name__ == "__main__":
     parser.add_argument('predictions_localization', type=str, metavar='PREDICTIONS_LOCALIZATION',
                         help='')
     args = parser.parse_args()
-    yaml_path = CONF_YAML
-    with open(yaml_path, 'r') as f:
-        exp_args = DictAsMember(yaml.safe_load(f))
+    # yaml_path = CONF_YAML
+    # with open(yaml_path, 'r') as f:
+    #     exp_args = DictAsMember(yaml.safe_load(f))
 
-    model = _get_detection_model(exp_args.MODEL.N_CLASS,
-                                 exp_args.MODEL.NAME,
+    model = _get_detection_model(CONF_MODEL_NCLASS,
+                                 CONF_MODEL_NAME,
                                  box_nms_thresh=CONF_NMS,
                                  box_score_thresh=CONF_DET)
 
