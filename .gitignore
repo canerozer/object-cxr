@@ -6,6 +6,6 @@ baseline/data/dev/*
 baseline/data/train/*
 baseline/data/dev.csv
 baseline/data/train.csv
-src/params.pt
+params.pt
 *.pyc
 *ion.csv

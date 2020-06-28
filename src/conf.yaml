@@ -1,7 +1,7 @@
 NAME: FRCNN_R152_FPN_2x_DA
 MODEL:
     NAME: "resnet152"        # Change
-    PRETRAINED: True        # Change
+    PRETRAINED: False        # Change
     BATCH_SIZE: 8
     N_CLASS: 2
     SAVE_TO: models
