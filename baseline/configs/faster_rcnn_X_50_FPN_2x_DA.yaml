@@ -1,6 +1,6 @@
-NAME: FRCNN_R50_FPN_2x_DA
+NAME: FRCNN_X50_FPN_2x_DA
 MODEL:
-    NAME: "resnet50"        # Change
+    NAME: "resnext50_32x4d"        # Change
     PRETRAINED: True        # Change
     BATCH_SIZE: 8
     N_CLASS: 2

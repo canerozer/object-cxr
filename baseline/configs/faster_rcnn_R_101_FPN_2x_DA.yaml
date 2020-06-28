@@ -11,8 +11,8 @@ SOLVER:
     MOMENTUM: 0.9
     WEIGHT_DECAY: 0.0005
 SCHEDULER:
-    IN_EVERY: [5]             # Change
-    GAMMA: 0.1
+    IN_EVERY: [10, 15]             # Change
+    GAMMA: 0.20
 RECORD:
     LOSS: True
     AUC: True
@@ -32,11 +32,11 @@ AUGMENT:
         CON: 0.4
         SAT: 0.4
         HUE: 0.1        
-    RANDOM_AFFINE:
-        STATE: True
+    AFFINE:
+        STATE: False
         P: 0.5
         DEG: 30
         TR: 0.1
         SC_MIN: 0.95
         SC_MAX: 1.05
-        SH: 0.1
+        SH: 15
