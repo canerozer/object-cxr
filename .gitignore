@@ -2,4 +2,7 @@
 baseline/.ipynb_checkpoints/
 baseline/__pycache__/
 baseline/models/
-baseline/data/*
+baseline/data/dev/*
+baseline/data/train/*
+baseline/data/dev.csv
+baseline/data/train.csv
