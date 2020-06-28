@@ -4,6 +4,11 @@ from collections import defaultdict, deque
 import datetime
 import pickle
 import time
+import random
+import numpy as np  
+import PIL
+from PIL import ImageDraw
+import matplotlib.pyplot as plt
 
 import torch
 import torch.distributed as dist
@@ -11,6 +16,14 @@ import torch.distributed as dist
 import errno
 import os
 
+
+fod_labels = ("background", "foreign_obj")
+label_map = {k: v+1 for v, k in enumerate(fod_labels)}
+rev_label_map = {v: k for k, v in label_map.items()}
+CLASSES = 2
+distinct_colors = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+               for i in range(CLASSES)]
+label_color_map  = {k: distinct_colors[i] for i, k in enumerate(label_map.keys())}
 
 class SmoothedValue(object):
     """Track a series of values and provide access to smoothed values over a
@@ -332,4 +345,27 @@ class DictAsMember(dict):
         if isinstance(value, dict):
             value = DictAsMember(value)
         return value
+
+
+def draw_PIL_image(image, boxes, labels):
+    '''
+        Draw PIL image
+        image: A PIL image
+        labels: A tensor of dimensions (#objects,)
+        boxes: A tensor of dimensions (#objects, 4)
+    '''
+    fig, ax = plt.subplots(1, 1)
+
+    if type(image) != PIL.Image.Image:
+        image = F.to_pil_image(image)
+    new_image = image.copy()
+    labels = labels.tolist()
+    draw = ImageDraw.Draw(new_image)
+    boxes = boxes.tolist()
+    for i in range(len(boxes)):
+        draw.rectangle(xy=boxes[i],
+                       outline=label_color_map[rev_label_map[labels[i]]])
+
+    im = ax.imshow(new_image)
+    plt.show()
 
