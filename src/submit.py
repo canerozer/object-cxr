@@ -5,12 +5,9 @@ from torch.utils.data import DataLoader
 
 import numpy as np
 import os
-import pandas as pd
-import matplotlib.pyplot as plt
 import utils
 import argparse
 import yaml
-from sklearn.metrics import roc_auc_score, roc_curve, auc
 from tqdm import tqdm
 
 from dataset import SubmitDataset
@@ -21,15 +18,8 @@ from fasterrcnn_models import _get_detection_model
 CONF_YAML = "src/conf.yaml"
 CONF_NMS = 0.05
 CONF_DET = 0.25
-CONF_WEIGHT = 'src/params.pt'
+CONF_WEIGHT = 'params.pt'
 
-
-# python src/<path-to-prediction-program> 
-#               image_path.csv 
-#               predictions_classification.csv
-#               predictions_localization.csv
-
-# python src/submit.py image_path.csv predictions_classification.csv predictions_localization.csv
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='CXR Object Localization')
@@ -66,7 +56,9 @@ if __name__ == "__main__":
                                  shuffle=False, num_workers=4)
                                  #collate_fn=utils.collate_fn)
 
-    device = torch.device('cuda:0')
+    #device = torch.device('cuda:0')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 
     model.load_state_dict(torch.load(CONF_WEIGHT))
     model.to(device)
