@@ -1,6 +1,6 @@
-NAME: FRCNN_R50_FPN_2x_DA
+NAME: FRCNN_R18_FPN_2x_DA_2
 MODEL:
-    NAME: "resnet50"        # Change
+    NAME: "resnet18"        # Change
     PRETRAINED: True        # Change
     BATCH_SIZE: 8
     N_CLASS: 2
@@ -11,7 +11,7 @@ SOLVER:
     MOMENTUM: 0.9
     WEIGHT_DECAY: 0.0005
 SCHEDULER:
-    IN_EVERY: [5]             # Change
+    IN_EVERY: [10, 15]             # Change
     GAMMA: 0.1
 RECORD:
     LOSS: True
