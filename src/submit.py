@@ -19,6 +19,14 @@ from utils import DictAsMember
 from fasterrcnn_models import _get_detection_model
 
 
+CONF_YAML = "configs/faster_rcnn"
+CONF_NMS = 0.05
+CONF_DET = 0.25
+CONF_WEIGHT
+
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='CXR Object Localization')
     parser.add_argument('--yaml', type=str, metavar='YAML',
