@@ -13,44 +13,37 @@ import yaml
 from sklearn.metrics import roc_auc_score, roc_curve, auc
 from tqdm import tqdm
 
-from dataset import ForeignObjectDataset
-from engine import train_one_epoch
+from dataset import SubmitDataset
 from utils import DictAsMember
 from fasterrcnn_models import _get_detection_model
 
 
-CONF_YAML = "configs/faster_rcnn"
+CONF_YAML = "conf.yaml"
 CONF_NMS = 0.05
 CONF_DET = 0.25
-CONF_WEIGHT
+CONF_WEIGHT = 'params.pt'
 
 
+# python src/<path-to-prediction-program> 
+#               image_path.csv 
+#               predictions_classification.csv
+#               predictions_localization.csv
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='CXR Object Localization')
-    parser.add_argument('--yaml', type=str, metavar='YAML',
+    parser.add_argument('image_path', type=str, metavar='YAML',
                         default="configs/faster_rcnn",
                         help='Enter the path for the YAML config')
-    parser.add_argument('--nms', type=float, metavar='NMS',
-                        default=0.05,
-                        help="Enter the NMS threshold for Faster R-CNN")
-    parser.add_argument('--det', type=float, metavar='DET',
-                        default=0.25,
-                        help="Enter the detection threshold for Faster R-CNN")
-    parser.add_argument('--weight', type=str, metavar='WEIGHT',
-                        default=None,
-                        help="Enter the model weights if overwrite is required")
     args = parser.parse_args()
-
-    yaml_path = args.yaml
+    yaml_path = CONF_YAML
     with open(yaml_path, 'r') as f:
         exp_args = DictAsMember(yaml.safe_load(f))
 
     model = _get_detection_model(exp_args.MODEL.N_CLASS,
                                  exp_args.MODEL.NAME,
-                                 box_nms_thresh=args.nms,
-                                 box_score_thresh=args.det)
+                                 box_nms_thresh=CONF_NMS,
+                                 box_score_thresh=CONF_DET)
 
     data_dir = 'data/'
 
@@ -68,10 +61,9 @@ if __name__ == "__main__":
                                                                std=img_std)]
                                          )
 
-    dataset_dev = ForeignObjectDataset(datafolder=data_dir+'dev/',
-                                       datatype='dev',
-                                       transform=data_transforms,
-                                       labels_dict=img_class_dict_dev)
+    dataset_dev = SubmitDataset(datafolder=data_dir+'dev/',
+                                transform=data_transforms)
+
     data_loader_val = DataLoader(dataset_dev,
                                  batch_size=1,
                                  shuffle=False, num_workers=4,
@@ -79,26 +71,17 @@ if __name__ == "__main__":
 
     device = torch.device('cuda:0')
 
-    if args.weight == None:
-        state_dict = os.path.join(exp_args.MODEL.SAVE_TO,
-                              exp_args.MODEL.NAME,
-                              exp_args.NAME + ".pt")
-    else:
-        state_dict = args.weight
-    
-    model.load_state_dict(torch.load(state_dict))
+    model.load_state_dict(torch.load(CONF_WEIGHT))
     model.to(device)
 
     model.eval()
 
     preds = []
-    labels = []
     locs = []
 
-    for image, label, width, height in tqdm(data_loader_val):
+    for image in tqdm(data_loader_val):
         
         image = list(img.to(device) for img in image)
-        labels.append(label[-1])
         
         outputs = model(image)
         
@@ -139,7 +122,7 @@ if __name__ == "__main__":
                                 "classification.csv")
     cls_res.to_csv(cls_res_path, columns=['image_name', 'prediction'],
                    sep=',', index=None)
-    #print('classification.csv generated.')
+    print('classification.csv generated.')
 
     loc_res = pd.DataFrame({'image_name': dataset_dev.image_files_list,
                             'prediction': locs})
@@ -148,24 +131,5 @@ if __name__ == "__main__":
                                 "localization.csv")
     loc_res.to_csv(loc_res_path, columns=['image_name', 'prediction'],
                    sep=',', index=None)
-    #print('localization.csv generated.')
+    print('localization.csv generated.')
 
-    pred = cls_res.prediction.values
-    gt = labels_dev.annotation.astype(bool).astype(float).values
-
-    acc = ((pred >= .5) == gt).mean()
-    fpr, tpr, _ = roc_curve(gt, pred)
-    roc_auc = auc(fpr, tpr)
-
-    fig, ax = plt.subplots(subplot_kw=dict(xlim=[0, 1], ylim=[0, 1],
-                                           aspect='equal'),
-                           figsize=(6, 6))
-    ax.plot(fpr, tpr, label=f'ACC: {acc:.03}\nAUC: {roc_auc:.03}')
-    _ = ax.legend(loc="lower right")
-    _ = ax.set_title('ROC curve')
-    ax.grid(linestyle='dashed')
-    roc_curve = os.path.join(exp_args.MODEL.SAVE_TO,
-                             exp_args.MODEL.NAME,
-                             "roc_curve.eps")
-    #plt.savefig(roc_curve)
-    print("ACC: {} AUC: {}".format(acc, roc_auc))
