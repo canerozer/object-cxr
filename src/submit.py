@@ -18,10 +18,10 @@ from utils import DictAsMember
 from fasterrcnn_models import _get_detection_model
 
 
-CONF_YAML = "conf.yaml"
+CONF_YAML = "src/conf.yaml"
 CONF_NMS = 0.05
 CONF_DET = 0.25
-CONF_WEIGHT = 'params.pt'
+CONF_WEIGHT = 'src/params.pt'
 
 
 # python src/<path-to-prediction-program> 
@@ -29,7 +29,7 @@ CONF_WEIGHT = 'params.pt'
 #               predictions_classification.csv
 #               predictions_localization.csv
 
-# python submit.py image_path.csv predictions_classification.csv predictions_localization.csv
+# python src/submit.py image_path.csv predictions_classification.csv predictions_localization.csv
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='CXR Object Localization')
