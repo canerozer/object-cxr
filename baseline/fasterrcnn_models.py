@@ -2,6 +2,7 @@ from torchvision.models.detection import FasterRCNN
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
+
 def fasterrcnn_resnet_fpn(pretrained=False, progress=True, resnet='resnet50',
                           num_classes=91, pretrained_backbone=True, **kwargs):
     if pretrained:

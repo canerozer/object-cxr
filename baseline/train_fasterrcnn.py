@@ -179,7 +179,8 @@ if __name__ == "__main__":
                                  collate_fn=utils.collate_fn)
 
     model_ft = _get_detection_model(exp_args.MODEL.N_CLASS,
-                                    exp_args.MODEL.NAME)
+                                    exp_args.MODEL.NAME,
+                                   )
     model_ft.to(device)
 
     params = [p for p in model_ft.parameters() if p.requires_grad]
